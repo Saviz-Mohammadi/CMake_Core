@@ -1,0 +1,60 @@
+############################# MULTI-CONFIG ENVIRONMENTS:
+
+
+
+
+Generation command: [cmake -S "../source/" -B "./project temp files/" -G "Generator" -A "Platform" -DUSE_LIB_SFML=OFF -DUSE_LIB_WXWIDGETS=OFF -DUSE_LIB_BOOST=OFF]
+Build command:      [cmake --build "./project temp files/" --target "target-name";"target-name"]
+
+
+@ Generator:
+
+	"Visual Studio 17 2022"
+	"Visual Studio 16 2019"
+
+
+@ Platform:
+	
+	Win32		(Normal PC/Laptop processors - 32 bit)
+	x64			(Normal PC/Laptop processors - 64 bit)
+
+	ARM			(ARM is mostly used for Mobile CPU architectures - 32 bit)
+	ARM64		(ARM is mostly used for Mobile CPU architectures - 64 bit)
+
+
+
+
+############################# SINGLE-CONFIG ENVIRONMENTS:
+
+
+
+
+Generation command: [cmake -S "../source/" -B "./project temp files/" -G "Generator" -DCMAKE_CXX_FLAGS="Architecture" -DCMAKE_BUILD_TYPE="Build_type" -DUSE_LIB_SFML=OFF -DUSE_LIB_WXWIDGETS=OFF -DUSE_LIB_BOOST=OFF]
+Build command:      [cmake --build "./project temp files/" --target "target-name";"target-name" --config "Release"]
+
+
+@ Generator:
+
+	MinGW Makefiles
+
+
+@ Architecture:
+
+	-m64	(64-bit)
+	-m32	(32-bit)
+
+
+@ Build_type:
+
+	Debug			(No optimization, used for debuging and testing only)
+	Release			(High optimization level, no debuging info included)
+	RelWithDebInfo 	(Mostly optimized, with some minor debug info)
+	MinSizeRel		(Same as Release, but optimized for size rather than speed)
+
+
+
+
+############################# HELP:
+
+
+Run this command for help documentation: [cmake --help]
