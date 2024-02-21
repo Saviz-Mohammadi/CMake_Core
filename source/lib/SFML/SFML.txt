@@ -1,1 +1,0 @@
-Your SFML files need to be placed in this directory. Once done you can delete this text file.

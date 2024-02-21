@@ -27,8 +27,8 @@ C++ Compiler (e.g., g++, clang++, MSVC)
 In the 'source' directory, please make sure the following set of external party libraries are downloaded and placed into their respective folders before attempting to generate the project:
 ```diff
 Boost      # Must be placed under "CMake_Core/source/lib/Boost".
-SFML       # Must be placed under "CMake_Core/source/lib/SFML".
 wxWidgets  # Must be placed under "CMake_Core/source/lib/wxWidgets".
+Curl       # Must be placed under "CMake_Core/source/lib/Curl".
 ```
 
 <br>
