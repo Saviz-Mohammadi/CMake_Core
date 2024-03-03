@@ -36,28 +36,67 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
 
-# You need to make sure that the corresponding libraries are downloaded
-# and placed into their corresponding folder before trying to enable
-# these options. Also make sure that your CMakeCache is reset.
-	
+option(USE_LIB_NLOHMANN_JSON
+
+    "Adds the library nlohmann_json to the project (Jason interpreter library)"
+    OFF)
+
+option(USE_LIB_FMT
+
+    "Adds the library fmt to the project (Formatting library)"
+    OFF)
+
+option(USE_LIB_SPDLOG
+
+    "Adds the library spdlog to the project (Networking/HTPP library)"
+    OFF)
+
+option(USE_LIB_CXXOPTS
+
+    "Adds the library cxxopts to the project (Command line Argument parser library)"
+    OFF)
+
+option(USE_LIB_CATCH2
+
+    "Adds the library Catch2 to the project (Unit testing library)"
+    OFF)
+
 option(USE_LIB_WXWIDGETS
 	
-    "Adds the library wxWidgets to the project"
+    "Adds the library spdlog to the project (Logging library)"
     OFF)
 	
 option(USE_LIB_BOOST
 	
-    "Adds the library Boost to the project"
+    "Adds the library Boost to the project (Utility library)"
     OFF)
 
 option(USE_LIB_CURL
 
-    "Adds the library Curl to the project"
+    "Adds the library Curl to the project (Networking/HTPP library)"
     OFF)
 
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
 # [[ Library options ]]
+
+
+
+
+
+# [[ Resource files for copying ]]
+# [[ ----------------------------------------------------------------------- ]]
+# [[ ----------------------------------------------------------------------- ]]
+
+set(RESOURCE_FILES
+
+    "file.txt")
+
+# Add more files as needed (Image files, Text files, etc...)
+
+# [[ ----------------------------------------------------------------------- ]]
+# [[ ----------------------------------------------------------------------- ]]
+# [[ Resource files for copying ]]
 
 
 
@@ -119,11 +158,11 @@ add_executable(${EXECUTABLE_NAME})
 
 set(HEADER_FILES
 
-    "${CMAKE_CURRENT_LIST_DIR}/main.hpp")
+    "${CMAKE_CURRENT_SOURCE_DIR}/main.hpp")
 
 set(SOURCE_FILES
 
-    "${CMAKE_CURRENT_LIST_DIR}/main.cpp")
+    "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
 
 
 
@@ -210,38 +249,159 @@ target_compile_definitions(${EXECUTABLE_NAME}
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
 
-set(EXTERNAL_EXTERNAL_LIBRARIES_TO_LINK)
+set(EXTERNAL_LIBRARIES_TO_LINK)
+
+
+
+include(FetchContent)
+
+
+
+if(USE_LIB_NLOHMANN_JSON)
+
+    FetchContent_Declare(nlohmann_json
+
+        GIT_REPOSITORY https://github.com/nlohmann/json
+        GIT_TAG v3.11.2
+        GIT_SHALLOW TRUE)
+
+    FetchContent_MakeAvailable(nlohmann_json)
+
+    list(APPEND
+
+        EXTERNAL_LIBRARIES_TO_LINK
+
+        nlohmann_json::nlohmann_json)
+
+endif()
+
+
+
+if(USE_LIB_FMT)
+
+    FetchContent_Declare(fmt
+
+        GIT_REPOSITORY https://github.com/fmtlib/fmt
+        GIT_TAG 9.1.0
+        GIT_SHALLOW TRUE)
+
+    FetchContent_MakeAvailable(fmt)
+
+    list(APPEND
+
+        EXTERNAL_LIBRARIES_TO_LINK
+
+        fmt::fmt)
+
+endif()
+
+
+
+if(USE_LIB_SPDLOG)
+
+    FetchContent_Declare(spdlog
+
+        GIT_REPOSITORY https://github.com/gabime/spdlog
+        GIT_TAG v1.11.0
+        GIT_SHALLOW TRUE)
+
+    FetchContent_MakeAvailable(spdlog)
+
+    list(APPEND
+
+        EXTERNAL_LIBRARIES_TO_LINK
+
+        spdlog::spdlog)
+
+endif()
+
+
+
+if(USE_LIB_CXXOPTS)
+
+    FetchContent_Declare(cxxopts
+
+        GIT_REPOSITORY https://github.com/jarro2783/cxxopts
+        GIT_TAG v3.0.0
+        GIT_SHALLOW TRUE)
+
+    FetchContent_MakeAvailable(cxxopts)
+
+    list(APPEND
+
+        EXTERNAL_LIBRARIES_TO_LINK
+
+        cxxopts::cxxopts)
+
+endif()
+
+
+
+if(USE_LIB_CATCH2)
+
+    FetchContent_Declare(Catch2
+
+        GIT_REPOSITORY https://github.com/catchorg/Catch2
+        GIT_TAG v2.13.9
+        GIT_SHALLOW TRUE)
+
+    FetchContent_MakeAvailable(Catch2)
+
+    list(APPEND
+
+        EXTERNAL_LIBRARIES_TO_LINK
+
+        cxxopts::cxxopts)
+
+endif()
 
 
 
 if(USE_LIB_WXWIDGETS)
 
-    set(wxWidgets_ROOT_DIR
+    set(wxWidgets_USE_STATIC 1)
+    set(wxBUILD_SHARED OFF)
 
-        "${CMAKE_SOURCE_DIR}/lib/wxWidgets")
+    FetchContent_Declare(wxWidgets
 
-    set(wxWidgets_LIB_DIR
+       GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
+       GIT_TAG v3.2.1
+    )
 
-        "${CMAKE_SOURCE_DIR}/lib/wxWidgets/lib/..._dll/")
-
-    set(wxWidgets_INCLUDE_DIRS
-
-        "${CMAKE_SOURCE_DIR}/lib/wxWidgets/include")
-
-
-
-    set(wxWidgets_USE_STATIC ON)
-    set(wxWidgets_EXCLUDE_COMMON_LIBRARIES TRUE)
-    set(wxWidgets_USE_UNICODE ON)
+    FetchContent_GetProperties(wxwidgets)
 
 
 
-    find_package(wxWidgets REQUIRED gl core base)
+    if(NOT wxwidgets_POPULATED)
+       FetchContent_Populate(wxwidgets)
+       add_subdirectory(${wxwidgets_SOURCE_DIR} "C:/Users/Saviz/Desktop/CMake_Core/build/bin/_deps/wxwidgets-build")
+    endif()
 
-    include(${wxWidgets_USE_FILE})
 
-    list(APPEND EXTERNAL_LIBRARIES_TO_LINK ${wxWidgets_LIBRARIES})
+    list(APPEND
 
+        EXTERNAL_LIBRARIES_TO_LINK
+
+        wx::base
+        wx::core
+        wx::adv
+        wx::aui
+        wx::propgrid
+        wx::richtext
+        wx::stc
+        wx::html
+        wx::media
+        wx::net
+        wx::webview
+        wx::xml
+        wx::qa
+        wx::gl
+        wx::ribbon
+        wx::charts
+        wx::grid
+        wx::printout
+        wx::svg
+        wx::xrc)
 
 
     if(CMAKE_SIZEOF_VOID_P EQUAL 8)
@@ -268,45 +428,26 @@ endif()
 
 if(USE_LIB_BOOST)
 
-	list(APPEND
-	
-            CMAKE_PREFIX_PATH
-
-            "${CMAKE_SOURCE_DIR}/lib/Boost")
-
-
-
-	set(Boost_USE_STATIC_LIBS        ON)  # only find static libs
-	set(Boost_USE_DEBUG_LIBS        OFF)  # ignore debug libs and
-	set(Boost_USE_RELEASE_LIBS       ON)  # only find release libs
-	set(Boost_USE_MULTITHREADED      ON)
-	set(Boost_USE_STATIC_RUNTIME    OFF)
-	
-
-
-        find_package(Boost 1.66.0 COMPONENTS date_time filesystem system)
-	
-        include_directories(${Boost_INCLUDE_DIRS})
-
-        list(APPEND EXTERNAL_LIBRARIES_TO_LINK ${Boost_LIBRARIES})
-
 endif()
 
 
 
 if(USE_LIB_CURL)
 
+    FetchContent_Declare(curl
+
+        GIT_REPOSITORY https://github.com/curl/curl
+        GIT_TAG curl-8_6_0
+        GIT_SHALLOW TRUE)
+
+    FetchContent_MakeAvailable(curl)
+
     list(APPEND
 
-        CMAKE_PREFIX_PATH
+        EXTERNAL_LIBRARIES_TO_LINK
 
-        "${CMAKE_SOURCE_DIR}/lib/Curl")
-
-    find_package(CURL REQUIRED)
-
-    include_directories(${CURL_INCLUDE_DIRS})
-
-    list(APPEND EXTERNAL_LIBRARIES_TO_LINK ${CURL_LIBRARIES})
+        CURL::curl
+        CURL::libcurl)
 
 endif()
 
@@ -337,3 +478,52 @@ target_link_libraries(${EXECUTABLE_NAME}
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
 # [[ Modules ]]
+
+
+
+
+
+# [[ Custom targets ]]
+# [[ ----------------------------------------------------------------------- ]]
+# [[ ----------------------------------------------------------------------- ]]
+
+add_custom_target(CopyResourceFiles
+
+    COMMENT "Copying resource files to output directory")
+
+# Loop over the list of resource files and add copy commands for each file
+foreach(RESOURCE_FILES ${RESOURCE_FILESS})
+
+    add_custom_command(TARGET CopyResourceFiles POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/resources/${RESOURCE_FILES}"
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/${RESOURCE_FILES}"
+        COMMENT "Copying ${RESOURCE_FILES} to output directory")
+
+endforeach()
+
+add_dependencies(${EXECUTABLE_NAME} CopyResourceFiles)
+
+
+
+add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        $<TARGET_RUNTIME_DLLS:${EXECUTABLE_NAME}>
+        $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
+    COMMENT "Copying DLLs to target directory")
+
+
+
+if(USE_LIB_CURL)
+
+    add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CURL_LIBRARY_DIR}/curl-ca-bundle.crt"
+        $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
+        COMMENT "Copying curl-ca-bundle.crt to target directory")
+
+endif()
+
+# [[ ----------------------------------------------------------------------- ]]
+# [[ ----------------------------------------------------------------------- ]]
+# [[ Custom targets ]]

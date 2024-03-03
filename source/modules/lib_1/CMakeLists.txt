@@ -30,23 +30,7 @@ target_include_directories(${LIBRARY_NAME}
 
 
 
-set(LIBRARIES_TO_LINK)
-
-if(Boost_FOUND)
-    list(APPEND LIBRARIES_TO_LINK ${Boost_LIBRARIES})
-endif()
-
-if(wxWidgets_FOUND)
-    list(APPEND LIBRARIES_TO_LINK ${wxWidgets_LIBRARIES})
-endif()
-
-if(CURL_FOUND)
-    list(APPEND LIBRARIES_TO_LINK ${CURL_LIBRARIES})
-endif()
-
-
-
 target_link_libraries(${LIBRARY_NAME}
 
     PRIVATE
-    ${LIBRARIES_TO_LINK})
+    ${EXTERNAL_LIBRARIES_TO_LINK})

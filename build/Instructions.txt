@@ -3,7 +3,7 @@
 
 
 
-Generation command: [cmake -S "../source/" -B "./project temp files/" -G "Generator" -A "Platform" -DUSE_LIB_SFML=OFF -DUSE_LIB_WXWIDGETS=OFF -DUSE_LIB_BOOST=OFF]
+Generation command: [cmake --fresh -S "../source/" -B "./project temp files/" -G "Generator" -A "Platform"]
 Build command:      [cmake --build "./project temp files/" --target "target-name";"target-name"]
 
 
@@ -29,7 +29,7 @@ Build command:      [cmake --build "./project temp files/" --target "target-name
 
 
 
-Generation command: [cmake -S "../source/" -B "./project temp files/" -G "Generator" -DCMAKE_CXX_FLAGS="Architecture" -DCMAKE_BUILD_TYPE="Build_type" -DUSE_LIB_SFML=OFF -DUSE_LIB_WXWIDGETS=OFF -DUSE_LIB_BOOST=OFF]
+Generation command: [cmake --fresh -S "../source/" -B "./project temp files/" -G "Generator" -DCMAKE_CXX_FLAGS="Architecture" -DCMAKE_BUILD_TYPE="Build_type"]
 Build command:      [cmake --build "./project temp files/" --target "target-name";"target-name" --config "Release"]
 
 
