@@ -263,6 +263,12 @@ include(FetchContent)
 
 
 
+set(FETCHCONTENT_FULLY_DISCONNECTED OFF)    # Skips the DOWNLOAD and UPDATE steps
+set(FETCHCONTENT_UPDATES_DISCONNECTED OFF)  # Skips the UPDATE step
+set(FETCHCONTENT_QUIET ON)                  # Mute output logs
+
+
+
 if(USE_LIB_NLOHMANN_JSON)
 
     FetchContent_Declare(nlohmann_json
@@ -372,16 +378,9 @@ if(USE_LIB_WXWIDGETS)
 
        GIT_REPOSITORY https://github.com/wxWidgets/wxWidgets.git
        GIT_TAG v3.2.1
-    )
+       GIT_SHALLOW TRUE)
 
-    FetchContent_GetProperties(wxwidgets)
-
-
-
-    if(NOT wxwidgets_POPULATED)
-       FetchContent_Populate(wxwidgets)
-       add_subdirectory(${wxwidgets_SOURCE_DIR} "C:/Users/Saviz/Desktop/CMake_Core/build/bin/_deps/wxwidgets-build")
-    endif()
+    FetchContent_MakeAvailable(wxWidgets)
 
 
     list(APPEND
@@ -434,6 +433,39 @@ endif()
 
 if(USE_LIB_BOOST)
 
+    FetchContent_Declare(Boost
+
+        GIT_REPOSITORY https://github.com/boostorg/boost.git
+        GIT_TAG boost-1.80.0
+        GIT_SHALLOW TRUE)
+
+    FetchContent_MakeAvailable(Boost)
+
+    list(APPEND
+
+        EXTERNAL_LIBRARIES_TO_LINK
+
+        Boost::filesystem
+        Boost::system
+        Boost::regex
+        Boost::date_time
+        Boost::thread
+        Boost::coroutine
+        Boost::chrono
+        Boost::atomic
+        Boost::program_options
+        Boost::unit_test_framework
+        Boost::log
+        Boost::serialization
+        Boost::math
+        Boost::random
+        Boost::uuid
+        Boost::signals2
+        Boost::asio
+        Boost::graph
+        Boost::property_tree
+        Boost::mpi)
+
 endif()
 
 
@@ -442,9 +474,8 @@ if(USE_LIB_CURL)
 
     FetchContent_Declare(curl
 
-        GIT_REPOSITORY https://github.com/curl/curl
-        GIT_TAG curl-8_6_0
-        GIT_SHALLOW TRUE)
+        URL https://curl.se/download/curl-8.5.0.tar.gz
+        DOWNLOAD_EXTRACT_TIMESTAMP true)
 
     FetchContent_MakeAvailable(curl)
 
@@ -452,7 +483,6 @@ if(USE_LIB_CURL)
 
         EXTERNAL_LIBRARIES_TO_LINK
 
-        CURL::curl
         CURL::libcurl)
 
 endif()
@@ -475,9 +505,11 @@ add_subdirectory(modules)
 
 target_link_libraries(${EXECUTABLE_NAME}
 
+    # Libraries
     PRIVATE
     ${EXTERNAL_LIBRARIES_TO_LINK}
 
+    # Modules
     PRIVATE
     LIB_1)
 
