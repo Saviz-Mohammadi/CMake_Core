@@ -164,13 +164,19 @@ set(SOURCE_FILES
 
     "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
 
-
-
 set_target_properties(${EXECUTABLE_NAME}
-	
+
     PROPERTIES
 
     VERSION "${PROJECT_VERSION}")
+
+
+
+if(USE_LIB_WXWIDGETS)
+
+    list(APPEND SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/resources/wx.rc")
+
+endif()
 
 
 
