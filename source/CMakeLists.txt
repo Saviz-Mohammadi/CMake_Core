@@ -172,22 +172,13 @@ set_target_properties(${EXECUTABLE_NAME}
 
 
 
-if(USE_LIB_WXWIDGETS)
-
-    list(APPEND SOURCE_FILES "${CMAKE_CURRENT_SOURCE_DIR}/resources/wx.rc")
-
-endif()
-
-
-
 target_sources(${EXECUTABLE_NAME}
 	
     PUBLIC
     ${HEADER_FILES}
 
     PRIVATE
-    ${SOURCE_FILES}
-    )
+    ${SOURCE_FILES})
 
 
 
@@ -363,7 +354,7 @@ if(USE_LIB_CATCH2)
 
         EXTERNAL_LIBRARIES_TO_LINK
 
-        cxxopts::cxxopts)
+        Catch2::Catch2)
 
 endif()
 
@@ -402,10 +393,6 @@ if(USE_LIB_WXWIDGETS)
         wx::qa
         wx::gl
         wx::ribbon
-        wx::charts
-        wx::grid
-        wx::printout
-        wx::svg
         wx::xrc)
 
 
@@ -530,13 +517,13 @@ add_custom_target(CopyResourceFiles
     COMMENT "Copying resource files to output directory")
 
 # Loop over the list of resource files and add copy commands for each file
-foreach(RESOURCE_FILES ${RESOURCE_FILESS})
+foreach(RESOURCE_FILE ${RESOURCE_FILES})
 
     add_custom_command(TARGET CopyResourceFiles POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/resources/${RESOURCE_FILES}"
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/${RESOURCE_FILES}"
-        COMMENT "Copying ${RESOURCE_FILES} to output directory")
+        "${CMAKE_SOURCE_DIR}/resources/${RESOURCE_FILE}"
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/${RESOURCE_FILE}"
+        COMMENT "Copying ${RESOURCE_FILE} to output directory")
 
 endforeach()
 
@@ -546,21 +533,9 @@ add_dependencies(${EXECUTABLE_NAME} CopyResourceFiles)
 
 add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        $<TARGET_RUNTIME_DLLS:${EXECUTABLE_NAME}>
-        $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
+    $<TARGET_RUNTIME_DLLS:${EXECUTABLE_NAME}>
+    $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
     COMMENT "Copying DLLs to target directory")
-
-
-
-if(USE_LIB_CURL)
-
-    add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CURL_LIBRARY_DIR}/curl-ca-bundle.crt"
-        $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
-        COMMENT "Copying curl-ca-bundle.crt to target directory")
-
-endif()
 
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
