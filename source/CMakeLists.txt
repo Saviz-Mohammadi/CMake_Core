@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION "3.27.0" FATAL_ERROR)
 
 
-
+# add doxygen
+# add clang-format
+# add cmake-format
 
 
 # [[ Project ]]
@@ -35,6 +37,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 # [[ Library options ]]
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
+
+option(USE_LIB_DOXYGEN
+
+    "Adds the library DOXYGEN to the project (Documentation library)"
+    OFF)
 
 option(USE_LIB_NLOHMANN_JSON
 
@@ -79,6 +86,30 @@ option(USE_LIB_CURL
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
 # [[ Library options ]]
+
+
+
+
+
+# [[ Clang-format ]]
+# [[ ----------------------------------------------------------------------- ]]
+# [[ ----------------------------------------------------------------------- ]]
+
+find_program(CLANG_FORMAT_EXE
+    NAMES "clang-format"
+    DOC "Path to clang-format executable"
+)
+
+if(NOT CLANG_FORMAT_EXE)
+    message(STATUS "Clang-Format not found.")
+else()
+    message(STATUS "Clang-Format found: ${CLANG_FORMAT_EXE}")
+endif()
+
+
+# [[ ----------------------------------------------------------------------- ]]
+# [[ ----------------------------------------------------------------------- ]]
+# [[ Clang-format ]]
 
 
 
@@ -260,6 +291,23 @@ set(FETCHCONTENT_QUIET ON)                  # Mute output logs
 
 
 
+if(USE_LIB_DOXYGEN)
+
+    find_package(Doxygen)
+
+    set(DOXYGEN_GENERATE_HTML YES)
+    set(DOXYGEN_HTML_OUTPUT "${OUTPUT_DIRECTORY}/$<CONFIG>/docs")
+    set(DOXYGEN_GENERATE_TREEVIEW YES)
+
+    doxygen_add_docs(documentation
+
+        "${CMAKE_SOURCE_DIR}"
+        COMMENT "Generating documentation")
+
+endif()
+
+
+
 if(USE_LIB_NLOHMANN_JSON)
 
     FetchContent_Declare(nlohmann_json
@@ -355,6 +403,20 @@ if(USE_LIB_CATCH2)
         EXTERNAL_LIBRARIES_TO_LINK
 
         Catch2::Catch2)
+
+    # Needed for Catch2 to work:
+
+    # list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+    # include(CTest)
+    # include(Catch)
+    # catch_discover_tests(${EXECUTABLE_NAME})
+
+    # enable_testing()
+
+    # target_link_libraries(${EXECUTABLE_NAME}
+
+    #     PRIVATE
+    #     Catch2::Catch2WithMain)
 
 endif()
 
@@ -512,30 +574,55 @@ target_link_libraries(${EXECUTABLE_NAME}
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
 
+
+# As expected, .clang-format will only be applied when you actuall press build. since
+# it is a dpendencie that gets called only after building the target. I am still trying
+# to find a way to make it complete on pressing save, but it seems to be tricky.
+if(CLANG_FORMAT_EXE)
+    file(GLOB_RECURSE ALL_FILES
+        "${CMAKE_SOURCE_DIR}/*.cpp"
+        "${CMAKE_SOURCE_DIR}/*.hpp"
+        "${CMAKE_SOURCE_DIR}/*.h"
+    )
+
+    message(STATUS "Found source files: ${ALL_FILES}")
+
+    add_custom_target(
+        format
+        COMMAND ${CLANG_FORMAT_EXE} -i -style=file ${ALL_FILES}
+        COMMENT "Running clang-format on all source files"
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}  # Set the working directory for the command
+    )
+
+    add_dependencies(${EXECUTABLE_NAME} format)
+endif()
+
+
 add_custom_target(CopyResourceFiles
 
     COMMENT "Copying resource files to output directory")
 
 # Loop over the list of resource files and add copy commands for each file
 foreach(RESOURCE_FILE ${RESOURCE_FILES})
+    message(STATUS "Copying ${RESOURCE_FILE} to output directory")
 
     add_custom_command(TARGET CopyResourceFiles POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/resources/${RESOURCE_FILE}"
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/${RESOURCE_FILE}"
         COMMENT "Copying ${RESOURCE_FILE} to output directory")
-
 endforeach()
+
 
 add_dependencies(${EXECUTABLE_NAME} CopyResourceFiles)
 
 
-
-add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different
-    $<TARGET_RUNTIME_DLLS:${EXECUTABLE_NAME}>
-    $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
-    COMMENT "Copying DLLs to target directory")
+# This section creates issue, but why?
+# add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+#     $<TARGET_RUNTIME_DLLS:${EXECUTABLE_NAME}>
+#     $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
+#     COMMENT "Copying DLLs to target directory")
 
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
