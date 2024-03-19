@@ -1,42 +1,25 @@
 #include <iostream>
 #include <main.hpp>
 
+/** @file
+ * This file contains the main function for the application.
+ */
+
+/**
+ * @brief Entry point of the program.
+ *
+ * This function serves as the entry point of the program. It displays
+ * information about the target architecture, mode, and platform.
+ *
+ * @param argc (argument count) Number of command-line arguments passed to the
+ * program.
+ * @param argv (argument vector) Array of pointers to the command-line
+ * arguments.
+ * @return 0 on successful execution.
+ */
 int main(int argc, char *argv[]) {
-// TARGET ARCHITECTURE
-#ifdef TARGET_IS_64_BIT
-			std::cout << "64 bit." << std::endl;
-#endif
-#ifdef TARGET_IS_32_BIT
-			std::cout << "32 bit." << std::endl;
-#endif
 
-// TARGET MODE
-#ifdef DEBUG_MODE
-			std::cout << "Debug mode." << std::endl;
-#endif
+  std::cout << "Hello World!" << std::endl;
 
-#ifdef RELEASE_MODE
-			std::cout << "Release mode." << std::endl;
-#endif
-
-#ifdef RELEASE_WITH_DEBUGINFO_MODE
-			std::cout << "Release with debug mode." << std::endl;
-#endif
-#ifdef RELEASE_MINSIZE_MODE
-			std::cout << "Release minsize mode." << std::endl;
-#endif
-
-// TARGET PLATFORM
-#ifdef TARGET_IS_LINUX
-			std::cout << "Linux." << std::endl;
-#endif
-
-#ifdef TARGET_IS_APPLE
-			std::cout << "Apple." << std::endl;
-#endif
-
-#ifdef TARGET_IS_WINDOWS
-			std::cout << "Windows." << std::endl;
-#endif
-			return (0);
+  return (0);
 }

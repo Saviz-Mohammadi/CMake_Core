@@ -1,9 +1,7 @@
 cmake_minimum_required(VERSION "3.27.0" FATAL_ERROR)
 
 
-# add doxygen
-# add clang-format
-# add cmake-format
+
 
 
 # [[ Project ]]
@@ -41,7 +39,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(USE_LIB_DOXYGEN
 
     "Adds the library DOXYGEN to the project (Documentation library)"
-    OFF)
+    ON)
 
 option(USE_LIB_NLOHMANN_JSON
 
@@ -293,15 +291,16 @@ set(FETCHCONTENT_QUIET ON)                  # Mute output logs
 
 if(USE_LIB_DOXYGEN)
 
-    find_package(Doxygen)
+    find_package(Doxygen REQUIRED)
 
     set(DOXYGEN_GENERATE_HTML YES)
-    set(DOXYGEN_HTML_OUTPUT "${OUTPUT_DIRECTORY}/$<CONFIG>/docs")
+    set(DOXYGEN_HTML_OUTPUT "${CMAKE_BINARY_DIR}/doxygen") # See what is wrong with this.
     set(DOXYGEN_GENERATE_TREEVIEW YES)
 
     doxygen_add_docs(documentation
 
-        "${CMAKE_SOURCE_DIR}"
+        "${PROJECT_SOURCE_DIR}"
+        ALL # WHY DOES THIS OPTION FIX IT?
         COMMENT "Generating documentation")
 
 endif()
