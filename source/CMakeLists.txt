@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION "3.27.0" FATAL_ERROR)
 
 
-
+# Look at replies and complie curl static
 
 
 # [[ Project ]]
