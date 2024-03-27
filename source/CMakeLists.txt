@@ -1,7 +1,20 @@
 cmake_minimum_required(VERSION "3.27.0" FATAL_ERROR)
 
 
-# Look at replies and complie curl static
+# DESCRIPTION:
+# I am a very dumb student that simply wants to get passed my university stage of life.
+# I found myself continously making projects on different platforms, IDE's, compilers, and environments and found myself screwing a lot with options and things I didn't understand well.
+# As a result I put my big boy panths on and decided to create one Project template using CMake to resolve once and for all all of my needs. I understand that this is by no mean perfect nor acceptable.
+# But, that is totally fine as all I want to achieve is something that does it all for me without me having to pull my hair out. So, here is a description of what I expect of this script/ project template being capable of doing
+# and what things I have not figured out yet that I would highly appreciate if I can get some help with it. Any help, suggestions are highly appreciated as I have no clue what I am doing. If you find even the smallest incovinience or problem please let me know
+# so that I can better myself and this script.
+
+
+# TODO:
+# Compile Curl as static (Look at comments from udemy and CMake forum)
+# See why the custom target for copying DLL's is causing Ninja build errors.
+# Talk about compiler flags and toolchains.
+# Ask how testing with Catch2 works.
 
 
 # [[ Project ]]
@@ -95,8 +108,7 @@ option(USE_LIB_CURL
 
 find_program(CLANG_FORMAT_EXE
     NAMES "clang-format"
-    DOC "Path to clang-format executable"
-)
+    DOC "Path to clang-format executable")
 
 if(NOT CLANG_FORMAT_EXE)
     message(STATUS "Clang-Format not found.")
@@ -113,19 +125,27 @@ endif()
 
 
 
-# [[ Resource files for copying ]]
+# [[ Resource system ]]
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
 
-set(RESOURCE_FILES
+set(RESOURCE_TXT_FILES
 
     "file.txt")
 
-# Add more files as needed (Image files, Text files, etc...)
+set(RESOURCE_JSON_FILES
+
+    "file.json")
+	
+set(RESOURCE_ICON_FILES
+
+    "file.svg")
+
+# Add more files as needed...
 
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
-# [[ Resource files for copying ]]
+# [[ Resource system ]]
 
 
 
@@ -597,23 +617,54 @@ if(CLANG_FORMAT_EXE)
 endif()
 
 
-add_custom_target(CopyResourceFiles
+add_custom_target(CopyResourceFiles_TXT
 
     COMMENT "Copying resource files to output directory")
 
-# Loop over the list of resource files and add copy commands for each file
-foreach(RESOURCE_FILE ${RESOURCE_FILES})
+foreach(RESOURCE_FILE ${RESOURCE_TXT_FILES})
     message(STATUS "Copying ${RESOURCE_FILE} to output directory")
 
     add_custom_command(TARGET CopyResourceFiles POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
-        "${CMAKE_SOURCE_DIR}/resources/${RESOURCE_FILE}"
-        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/${RESOURCE_FILE}"
+        "${CMAKE_SOURCE_DIR}/resources/txt/${RESOURCE_TXT_FILES}"
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/txt/${RESOURCE_FILE}"
         COMMENT "Copying ${RESOURCE_FILE} to output directory")
 endforeach()
 
 
-add_dependencies(${EXECUTABLE_NAME} CopyResourceFiles)
+add_custom_target(CopyResourceFiles_JSON
+
+    COMMENT "Copying resource files to output directory")
+
+foreach(RESOURCE_FILE ${RESOURCE_JSON_FILES})
+    message(STATUS "Copying ${RESOURCE_FILE} to output directory")
+
+    add_custom_command(TARGET CopyResourceFiles POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/resources/json/${RESOURCE_JSON_FILES}"
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/json/${RESOURCE_FILE}"
+        COMMENT "Copying ${RESOURCE_FILE} to output directory")
+endforeach()
+
+
+add_custom_target(CopyResourceFiles_ICON
+
+    COMMENT "Copying resource files to output directory")
+
+foreach(RESOURCE_FILE ${RESOURCE_ICON_FILES})
+    message(STATUS "Copying ${RESOURCE_FILE} to output directory")
+
+    add_custom_command(TARGET CopyResourceFiles POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+        "${CMAKE_SOURCE_DIR}/resources/icons/${RESOURCE_ICON_FILES}"
+        "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/icons/${RESOURCE_FILE}"
+        COMMENT "Copying ${RESOURCE_FILE} to output directory")
+endforeach()
+
+
+add_dependencies(${EXECUTABLE_NAME} CopyResourceFiles_TXT)
+add_dependencies(${EXECUTABLE_NAME} CopyResourceFiles_JSON)
+add_dependencies(${EXECUTABLE_NAME} CopyResourceFiles_ICON)
 
 
 # This section creates issue, but why?
