@@ -10,13 +10,6 @@ cmake_minimum_required(VERSION "3.27.0" FATAL_ERROR)
 # so that I can better myself and this script.
 
 
-# TODO:
-# Compile Curl as static (Look at comments from udemy and CMake forum)
-# See why the custom target for copying DLL's is causing Ninja build errors.
-# Talk about compiler flags and toolchains.
-# Ask how testing with Catch2 works.
-
-
 # [[ Project ]]
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
@@ -239,6 +232,51 @@ target_include_directories(${EXECUTABLE_NAME}
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
 # [[ Executable Target ]]
+
+
+
+
+# I keep hearing from different discussions on the internet that including the 
+# "Compile options" and setting different compiler flags is a bad idea as CMake
+# must only have enough insturctions to build the project and nothing more. These posts
+# also say that things like this should be left to handle via a toolchain script.
+# On the other hand, many developers actually believe it is good practice to specify these things 
+# directly. I wanted to know what is your opinnion on this matter, should I keep this? Or do I just get rid of it?
+
+# [[ Compile options ]]
+# [[ ----------------------------------------------------------------------- ]]
+# [[ ----------------------------------------------------------------------- ]]
+
+# Check if the compiler supports specific flags
+include(CheckCXXCompilerFlag)
+
+# Check for -Wall flag
+check_cxx_compiler_flag("-Wall" COMPILER_SUPPORTS_WALL)
+if(COMPILER_SUPPORTS_WALL)
+    add_compile_options(-Wall)
+endif()
+
+# Check for -Werror flag
+check_cxx_compiler_flag("-Werror" COMPILER_SUPPORTS_WERROR)
+if(COMPILER_SUPPORTS_WERROR)
+    add_compile_options(-Werror)
+endif()
+
+# Check for -Wno-error=maybe-uninitialized flag
+check_cxx_compiler_flag("-Wno-error=maybe-uninitialized" COMPILER_SUPPORTS_WNO_ERROR_MAYBE_UNINITIALIZED)
+if(COMPILER_SUPPORTS_WNO_ERROR_MAYBE_UNINITIALIZED)
+    add_compile_options(-Wno-error=maybe-uninitialized)
+endif()
+
+
+add_compile_options(
+       $<$<CONFIG:RELEASE>:-Ofast>
+       $<$<CONFIG:DEBUG>:-O0>
+       $<$<CONFIG:DEBUG>:-ggdb3>)
+
+# [[ ----------------------------------------------------------------------- ]]
+# [[ ----------------------------------------------------------------------- ]]
+# [[ Compile options ]]
 
 
 
@@ -546,12 +584,18 @@ if(USE_LIB_CURL)
         DOWNLOAD_EXTRACT_TIMESTAMP true)
 
     FetchContent_MakeAvailable(curl)
+	
+	# A full list of options can be seen here:
+	# https://github.com/curl/curl/blob/5ce164e0e9290c96eb7d502173426c0a135ec008/CMakeLists.txt#L84C1-L91C77
+	
+	set(BUILD_STATIC_LIBS ON)
+	
 
     list(APPEND
 
         EXTERNAL_LIBRARIES_TO_LINK
 
-        CURL::libcurl)
+        CURL::libcurl_static)
 
 endif()
 
@@ -667,12 +711,27 @@ add_dependencies(${EXECUTABLE_NAME} CopyResourceFiles_JSON)
 add_dependencies(${EXECUTABLE_NAME} CopyResourceFiles_ICON)
 
 
-# This section creates issue, but why?
-# add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
-#     COMMAND ${CMAKE_COMMAND} -E copy_if_different
-#     $<TARGET_RUNTIME_DLLS:${EXECUTABLE_NAME}>
-#     $<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
-#     COMMENT "Copying DLLs to target directory")
+
+# Copy DLL files to binary dir.
+if(WIN32)
+    
+	# This command will do fine as long as other projects/libs have set property to SHARED.
+	# But, many of them have it set to UNKNOWN. So, what do we do if this command does not find all the dll's?
+	add_custom_command(TARGET ${EXECUTABLE_NAME} POST_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different
+		$<TARGET_RUNTIME_DLLS:${EXECUTABLE_NAME}>
+		$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
+		COMMAND_EXPAND_LISTS
+		COMMENT "Copying DLLs to target directory")
+	
+	
+elseif(APPLE)
+    
+    set_target_properties(MyExecutable PROPERTIES INSTALL_RPATH "@loader_path/lib")
+elseif(UNIX)
+    
+    set_target_properties(MyExecutable PROPERTIES INSTALL_RPATH "$ORIGIN/lib")
+endif()
 
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
