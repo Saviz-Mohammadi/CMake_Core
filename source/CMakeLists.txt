@@ -45,7 +45,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 option(USE_LIB_DOXYGEN
 
     "Adds the library DOXYGEN to the project (Documentation library)"
-    ON)
+    OFF)
 
 option(USE_LIB_NLOHMANN_JSON
 
@@ -67,10 +67,10 @@ option(USE_LIB_CXXOPTS
     "Adds the library cxxopts to the project (Command line Argument parser library)"
     OFF)
 
-option(USE_LIB_CATCH2
+option(USE_LIB_GoogleTest
 
     "Adds the library Catch2 to the project (Unit testing library)"
-    OFF)
+    ON)
 
 option(USE_LIB_WXWIDGETS
 	
@@ -247,32 +247,34 @@ target_include_directories(${EXECUTABLE_NAME}
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
 
-# Check if the compiler supports specific flags
-include(CheckCXXCompilerFlag)
+# # Check if the compiler supports specific flags
+# include(CheckCXXCompilerFlag)
 
-# Check for -Wall flag
-check_cxx_compiler_flag("-Wall" COMPILER_SUPPORTS_WALL)
-if(COMPILER_SUPPORTS_WALL)
-    add_compile_options(-Wall)
-endif()
+# # Check for -Wall flag
+# check_cxx_compiler_flag("-Wall" COMPILER_SUPPORTS_WALL)
+# if(COMPILER_SUPPORTS_WALL)
+#     add_compile_options(-Wall)
+# endif()
 
-# Check for -Werror flag
-check_cxx_compiler_flag("-Werror" COMPILER_SUPPORTS_WERROR)
-if(COMPILER_SUPPORTS_WERROR)
-    add_compile_options(-Werror)
-endif()
+# # Check for -Werror flag
+# check_cxx_compiler_flag("-Werror" COMPILER_SUPPORTS_WERROR)
+# if(COMPILER_SUPPORTS_WERROR)
+#     add_compile_options(-Werror)
+# endif()
 
-# Check for -Wno-error=maybe-uninitialized flag
-check_cxx_compiler_flag("-Wno-error=maybe-uninitialized" COMPILER_SUPPORTS_WNO_ERROR_MAYBE_UNINITIALIZED)
-if(COMPILER_SUPPORTS_WNO_ERROR_MAYBE_UNINITIALIZED)
-    add_compile_options(-Wno-error=maybe-uninitialized)
-endif()
+# # Check for -Wno-error=maybe-uninitialized flag
+# check_cxx_compiler_flag("-Wno-error=maybe-uninitialized" COMPILER_SUPPORTS_WNO_ERROR_MAYBE_UNINITIALIZED)
+# if(COMPILER_SUPPORTS_WNO_ERROR_MAYBE_UNINITIALIZED)
+#     add_compile_options(-Wno-error=maybe-uninitialized)
+# endif()
 
 
-add_compile_options(
-       $<$<CONFIG:RELEASE>:-Ofast>
-       $<$<CONFIG:DEBUG>:-O0>
-       $<$<CONFIG:DEBUG>:-ggdb3>)
+# add_compile_options(
+#        $<$<CONFIG:RELEASE>:-Ofast>
+#        $<$<CONFIG:DEBUG>:-O0>
+#        $<$<CONFIG:DEBUG>:-ggdb3>)
+
+add_compile_options("$<$<CXX_COMPILER_ID:MSVC>:/Zc:wchar_t->")
 
 # [[ ----------------------------------------------------------------------- ]]
 # [[ ----------------------------------------------------------------------- ]]
@@ -445,35 +447,24 @@ endif()
 
 
 
-if(USE_LIB_CATCH2)
+if(USE_LIB_GoogleTest)
 
-    FetchContent_Declare(Catch2
+    FetchContent_Declare(GoogleTest
 
-        GIT_REPOSITORY https://github.com/catchorg/Catch2
-        GIT_TAG v2.13.9
+        GIT_REPOSITORY https://github.com/google/googletest
+        GIT_TAG v1.14.0
         GIT_SHALLOW TRUE)
 
-    FetchContent_MakeAvailable(Catch2)
+    FetchContent_MakeAvailable(GoogleTest)
+
+    enable_testing()
 
     list(APPEND
 
         EXTERNAL_LIBRARIES_TO_LINK
 
-        Catch2::Catch2)
-
-    # Needed for Catch2 to work:
-
-    # list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
-    # include(CTest)
-    # include(Catch)
-    # catch_discover_tests(${EXECUTABLE_NAME})
-
-    # enable_testing()
-
-    # target_link_libraries(${EXECUTABLE_NAME}
-
-    #     PRIVATE
-    #     Catch2::Catch2WithMain)
+        GTest::gtest_main
+        GTest::gmock_main)
 
 endif()
 
@@ -631,6 +622,21 @@ target_link_libraries(${EXECUTABLE_NAME}
 
 
 
+# [[ Modules ]]
+# [[ ----------------------------------------------------------------------- ]]
+# [[ ----------------------------------------------------------------------- ]]
+
+
+if(USE_LIB_GoogleTest)
+    include(GoogleTest)
+    add_subdirectory(unit_tests)
+endif()
+
+# [[ ----------------------------------------------------------------------- ]]
+# [[ ----------------------------------------------------------------------- ]]
+# [[ Modules ]]
+
+
 
 
 # [[ Custom targets ]]
@@ -668,7 +674,7 @@ add_custom_target(CopyResourceFiles_TXT
 foreach(RESOURCE_FILE ${RESOURCE_TXT_FILES})
     message(STATUS "Copying ${RESOURCE_FILE} to output directory")
 
-    add_custom_command(TARGET CopyResourceFiles POST_BUILD
+    add_custom_command(TARGET CopyResourceFiles_TXT POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/resources/txt/${RESOURCE_TXT_FILES}"
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/txt/${RESOURCE_FILE}"
@@ -683,7 +689,7 @@ add_custom_target(CopyResourceFiles_JSON
 foreach(RESOURCE_FILE ${RESOURCE_JSON_FILES})
     message(STATUS "Copying ${RESOURCE_FILE} to output directory")
 
-    add_custom_command(TARGET CopyResourceFiles POST_BUILD
+    add_custom_command(TARGET CopyResourceFiles_JSON POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/resources/json/${RESOURCE_JSON_FILES}"
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/json/${RESOURCE_FILE}"
@@ -698,7 +704,7 @@ add_custom_target(CopyResourceFiles_ICON
 foreach(RESOURCE_FILE ${RESOURCE_ICON_FILES})
     message(STATUS "Copying ${RESOURCE_FILE} to output directory")
 
-    add_custom_command(TARGET CopyResourceFiles POST_BUILD
+    add_custom_command(TARGET CopyResourceFiles_ICON POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
         "${CMAKE_SOURCE_DIR}/resources/icons/${RESOURCE_ICON_FILES}"
         "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/resources/icons/${RESOURCE_FILE}"
@@ -712,7 +718,7 @@ add_dependencies(${EXECUTABLE_NAME} CopyResourceFiles_ICON)
 
 
 
-# Copy DLL files to binary dir.
+# Copy DLL files to binary dir if we are dealing with windows. Unix platforms (mac, linux) use something called RPATH by default
 if(WIN32)
     
 	# This command will do fine as long as other projects/libs have set property to SHARED.
@@ -723,14 +729,6 @@ if(WIN32)
 		$<TARGET_FILE_DIR:${EXECUTABLE_NAME}>
 		COMMAND_EXPAND_LISTS
 		COMMENT "Copying DLLs to target directory")
-	
-	
-elseif(APPLE)
-    
-    set_target_properties(MyExecutable PROPERTIES INSTALL_RPATH "@loader_path/lib")
-elseif(UNIX)
-    
-    set_target_properties(MyExecutable PROPERTIES INSTALL_RPATH "$ORIGIN/lib")
 endif()
 
 # [[ ----------------------------------------------------------------------- ]]
