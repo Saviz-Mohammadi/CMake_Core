@@ -33,4 +33,4 @@ Curl       # Must be placed under "CMake_Core/source/lib/Curl".
 
 <br>
 
-You are now prepared to configure and build your project using CMake. Please make sure to open the terminal and navigate to the folder path of "CMake_Core/build". You can now copy the appropriate commands in the "Instructions.txt" file and execute them to start generating and working on your project.
+You are now prepared to configure and build your project using CMake. Please make sure to open the terminal and navigate to the folder path of "CMake_Core/build". You can now copy the appropriate commands in the "Instructions.txt" file and execute them to start generating and working on your project. Something changed.
